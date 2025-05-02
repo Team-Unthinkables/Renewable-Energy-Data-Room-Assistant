@@ -2,6 +2,7 @@ import os
 import json
 import re
 import google.generativeai as genai
+from database import db
 
 # Set up the Gemini API with the provided key
 GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY", "AIzaSyCL7WcFojRcescuZfdGw4iK_syGD3YfG5E")
@@ -43,7 +44,10 @@ def get_answer_with_citations(question, document_store, max_context_chunks=8):
     search_results = document_store.similarity_search(question, k=max_context_chunks)
     
     if not search_results:
-        return "I couldn't find any relevant information in the uploaded documents.", []
+        no_info_message = "I couldn't find any relevant information in the uploaded documents."
+        # Log the query to MongoDB
+        db.log_query(question, no_info_message)
+        return no_info_message, []
     
     # Format context from search results
     context = ""
@@ -113,11 +117,17 @@ def get_answer_with_citations(question, document_store, max_context_chunks=8):
                                     citations.append(citation)
                                     break
                 
+            # Log the successful query with citations to MongoDB
+            db.log_query(question, answer, citations)
             return answer, citations
         except Exception as parsing_error:
             # If parsing fails, return the raw text and extract citations
             print(f"Error parsing Gemini response: {parsing_error}")
             citations = extract_citations_from_text(response_text)
+            
+            # Log the query with raw response
+            db.log_query(question, response_text, citations)
+            
             return response_text, citations
             
     except Exception as e:
@@ -146,3 +156,23 @@ def extract_citations_from_text(answer_text):
         })
     
     return structured_citations
+
+def save_feedback(query_id, rating, comment=None):
+    """
+    Save user feedback on an answer.
+    
+    Args:
+        query_id: ID of the query to rate
+        rating: Numeric rating (e.g., 1-5)
+        comment: Optional feedback comment
+        
+    Returns:
+        Success flag
+    """
+    try:
+        # Store the feedback in MongoDB
+        success = db.store_feedback(query_id, rating, comment)
+        return success
+    except Exception as e:
+        print(f"Error saving feedback: {str(e)}")
+        return False

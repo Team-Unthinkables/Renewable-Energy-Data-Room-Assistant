@@ -7,12 +7,22 @@ from datetime import datetime
 # MongoDB connection setup
 class Database:
     def __init__(self):
-        # Use a local MongoDB URI for development
-        # In production, you would use a MongoDB Atlas connection string
-        self.mongo_uri = "mongodb://localhost:27017"
+        # Set up MongoDB connection - we'll use in-memory by default for Replit
+        # In a production environment, you'd use MongoDB Atlas or another MongoDB service
+        self.mongo_uri = os.environ.get("MONGODB_URI", None)
         self.client = None
         self.db = None
-        self.connect()
+        self.using_fallback = False
+        
+        # Try to connect to MongoDB if URI is provided
+        if self.mongo_uri:
+            connected = self.connect()
+            if not connected:
+                self._setup_fallback_storage()
+        else:
+            # Default to in-memory storage for Replit environment
+            print("No MongoDB URI found. Using in-memory storage.")
+            self._setup_fallback_storage()
     
     def connect(self):
         """Connect to MongoDB"""
@@ -29,13 +39,13 @@ class Database:
             # Ensure indexes
             self._create_indexes()
             
+            # Set flag to indicate we're not using fallback
+            self.using_fallback = False
+            
             print("Connected to MongoDB successfully!")
             return True
         except Exception as e:
             print(f"MongoDB connection error: {str(e)}")
-            
-            # Use a fallback in-memory storage
-            self._setup_fallback_storage()
             return False
     
     def _setup_fallback_storage(self):
