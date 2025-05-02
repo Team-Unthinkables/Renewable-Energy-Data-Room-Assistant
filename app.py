@@ -256,7 +256,11 @@ with main_container:
         
         if submit_button:
             if not user_question:
-                st.warning("Please enter a question.")
+                st.markdown('''
+                <div style="background-color: #fff3e0; padding: 1rem; border-radius: 8px; border-left: 4px solid #ff9800; margin: 1rem 0;">
+                    <p style="margin: 0;">Please enter a question first.</p>
+                </div>
+                ''', unsafe_allow_html=True)
             else:
                 with st.spinner("Analyzing documents and generating answer..."):
                     try:
@@ -265,9 +269,15 @@ with main_container:
                             document_store=st.session_state.document_store
                         )
                         
-                        # Display the answer
-                        st.subheader("Answer")
-                        st.write(answer)
+                        # Display the answer in a nice card
+                        st.markdown(f'''
+                        <div style="background-color: #f1f8e9; padding: 1.5rem; border-radius: 8px; border-left: 4px solid #4CAF50; margin: 1.5rem 0;">
+                            <h3 style="color: #2E7D32; margin-top: 0; display: flex; align-items: center;">
+                                <span style="margin-right: 10px;">💡</span> Answer
+                            </h3>
+                            <p style="font-size: 1.1rem; line-height: 1.6;">{answer}</p>
+                        </div>
+                        ''', unsafe_allow_html=True)
                         
                         # Display citations
                         if citations:
