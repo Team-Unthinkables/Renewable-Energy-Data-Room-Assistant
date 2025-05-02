@@ -4,7 +4,7 @@ import streamlit as st
 from document_processor import extract_text_from_file, is_supported_file
 from document_store import DocumentStore
 from qa_engine import get_answer_with_citations
-from utils import get_file_extension, create_session_state_if_not_exists
+from utils import get_file_extension, create_session_state_if_not_exists, get_file_icon
 
 # Set environment variable for Gemini API
 os.environ["GEMINI_API_KEY"] = os.environ.get("GEMINI_API_KEY", "AIzaSyCL7WcFojRcescuZfdGw4iK_syGD3YfG5E")
@@ -281,14 +281,33 @@ with main_container:
                         
                         # Display citations
                         if citations:
-                            st.subheader("Citations")
+                            st.markdown('''
+                            <h3 style="color: #2E7D32; display: flex; align-items: center; margin-top: 2rem;">
+                                <span style="margin-right: 10px;">📚</span> Citations
+                            </h3>
+                            ''', unsafe_allow_html=True)
                             for i, citation in enumerate(citations, 1):
                                 with st.expander(f"Citation {i}: {citation['filename']} (Page {citation['page_number']})"):
-                                    st.markdown(f"```\n{citation['text']}\n```")
+                                    st.markdown('''
+                                    <div class="citation-box">
+                                    ''', unsafe_allow_html=True)
+                                    st.write(citation['text'])
+                                    st.markdown('''
+                                    </div>
+                                    ''', unsafe_allow_html=True)
                         else:
-                            st.info("No specific citations found for this answer.")
+                            st.markdown('''
+                            <div style="background-color: #e8f5e9; padding: 1rem; border-radius: 8px; margin: 1rem 0; display: flex; align-items: center;">
+                                <span style="font-size: 1.2rem; margin-right: 0.7rem;">ℹ️</span>
+                                <p style="margin: 0;">No specific citations found for this answer.</p>
+                            </div>
+                            ''', unsafe_allow_html=True)
                     except Exception as e:
-                        st.error(f"Error processing your question: {str(e)}")
+                        st.markdown(f'''
+                        <div style="background-color: #ffebee; padding: 1rem; border-radius: 8px; border-left: 4px solid #f44336; margin: 1rem 0;">
+                            <p style="margin: 0;"><strong>Error: </strong>{str(e)}</p>
+                        </div>
+                        ''', unsafe_allow_html=True)
     
     # Example questions section
     with st.expander("Example Questions"):
