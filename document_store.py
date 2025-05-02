@@ -4,6 +4,7 @@ import numpy as np
 import faiss
 from document_processor import split_text_into_chunks
 import google.generativeai as genai
+from database import db
 
 # Set up the Gemini API with the provided key
 GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY", "AIzaSyCL7WcFojRcescuZfdGw4iK_syGD3YfG5E")
@@ -14,8 +15,8 @@ class DocumentStore:
     
     def __init__(self):
         """Initialize the document store with a FAISS vector database."""
-        self.documents = {}  # Store document metadata
-        self.chunks = {}  # Store text chunks with metadata
+        self.documents = {}  # Local cache for document metadata
+        self.chunks = {}  # Local cache for text chunks with metadata
         self.vector_store = None  # FAISS index
         self.chunk_ids_list = []  # List to keep track of chunk IDs in same order as vectors
         self.embedding_dimension = 768  # Dimension of the embedding vectors for text embedding
@@ -90,11 +91,14 @@ class DocumentStore:
         # Generate a unique ID for the document
         document_id = str(uuid.uuid4())
         
-        # Store document metadata
+        # Store document metadata both locally and in MongoDB
         self.documents[document_id] = {
             'filename': filename,
             'page_count': len(content)
         }
+        
+        # Store in MongoDB
+        db.store_document(filename, content, document_id)
         
         # Split document into chunks
         document_chunks = split_text_into_chunks(content)
@@ -110,6 +114,9 @@ class DocumentStore:
                 'text': chunk['text']
             }
         
+        # Store chunks in MongoDB
+        db.store_chunks(document_id, document_chunks)
+        
         # Update the vector store
         self._rebuild_vector_store()
         
@@ -123,10 +130,10 @@ class DocumentStore:
             document_id: ID of the document to remove
         """
         if document_id in self.documents:
-            # Remove document metadata
+            # Remove document metadata from local cache
             del self.documents[document_id]
             
-            # Remove associated chunks
+            # Remove associated chunks from local cache
             chunks_to_remove = []
             for chunk_id, chunk in self.chunks.items():
                 if chunk['document_id'] == document_id:
@@ -134,6 +141,9 @@ class DocumentStore:
             
             for chunk_id in chunks_to_remove:
                 del self.chunks[chunk_id]
+            
+            # Remove from MongoDB
+            db.delete_document(document_id)
             
             # Rebuild the vector store if there are remaining documents
             if self.chunks:
@@ -143,9 +153,13 @@ class DocumentStore:
     
     def clear_all(self):
         """Remove all documents and chunks from the store."""
+        # Clear local cache
         self.documents = {}
         self.chunks = {}
         self.vector_store = None
+        
+        # Clear MongoDB collections
+        db.clear_all()
     
     def _rebuild_vector_store(self):
         """Rebuild the FAISS vector store with the current chunks."""
