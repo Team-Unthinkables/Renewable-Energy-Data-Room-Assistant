@@ -74,7 +74,7 @@ class Database:
     def store_document(self, filename, content, document_id=None):
         """Store document metadata in MongoDB"""
         try:
-            if hasattr(self, 'using_fallback') and self.using_fallback:
+            if self.using_fallback:
                 # Fallback: store in memory
                 doc_id = document_id or str(uuid.uuid4())
                 self.fallback['documents'][doc_id] = {

@@ -1,0 +1,9 @@
+streamlit
+python-dotenv
+pymongo
+google-generativeai
+faiss-cpu
+numpy
+PyMuPDF
+docx2txt
+langchain

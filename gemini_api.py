@@ -17,7 +17,7 @@ generation_config = {
 # Get the Gemini model
 def get_gemini_model():
     try:
-        # Use Gemini 1.5 Pro model for better performance with structured data
+        # Use Gemini 2.5 Pro model for enhanced performance with structured data
         model = genai.GenerativeModel(
             model_name="gemini-1.5-pro",
             generation_config=generation_config
