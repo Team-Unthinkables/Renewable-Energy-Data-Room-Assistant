@@ -1,9 +1,20 @@
+# Framework
 streamlit
 python-dotenv
+
+# Database
 pymongo
+
+# AI Agent
 google-generativeai
+
+# Essentials for PDF Processing
 faiss-cpu
-numpy
 PyMuPDF
 docx2txt
+
+# Dataframes
+numpy
+
+# Language Models
 langchain

@@ -18,7 +18,7 @@ Professionals in the renewable energy sector often face the daunting task of rev
 
 ## Technology Stack 🛠️
 
-- Core Language: Python 3.x
+- Core Language: Python 3.9.0 [Stable]
 - LLM: Google Gemini 1.5 Pro (via google-generativeai)
 - Embeddings: Google embedding-001
 - Vector Store: FAISS (faiss-cpu)

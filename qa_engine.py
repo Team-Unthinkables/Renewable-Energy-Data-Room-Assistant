@@ -47,7 +47,7 @@ def get_gemini_model(config=generation_config):
     try:
         # Using gemini-1.5-pro as specified. Ensure this model name is correct and available.
         model = genai.GenerativeModel(
-            model_name="gemini-1.5-pro", # Or another suitable model like gemini-1.5-flash
+            model_name="gemini-1.5-flash", # Or another suitable model like gemini-1.5-flash
             generation_config=config # Use the provided config
         )
         return model

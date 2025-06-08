@@ -19,7 +19,7 @@ def get_gemini_model():
     try:
         # Use Gemini 2.5 Pro model for enhanced performance with structured data
         model = genai.GenerativeModel(
-            model_name="gemini-1.5-pro",
+            model_name="gemini-1.5-flash",
             generation_config=generation_config
         )
         return model
