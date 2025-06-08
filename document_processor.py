@@ -21,42 +21,21 @@ def extract_text_from_file(file_path, file_extension):
     else:
         raise ValueError(f"Unsupported file type: {file_extension}")
 
-# Renamed PyPDF2 version (kept for reference, but not used)
-# def extract_text_from_pdf_pypdf2(pdf_path):
-#     """Extract text from a PDF file with page numbers using PyPDF2."""
-#     text_with_pages = []
-#     try:
-#         with open(pdf_path, 'rb') as file:
-#             pdf_reader = PyPDF2.PdfReader(file)
-#             total_pages = len(pdf_reader.pages)
-#             for page_num in range(total_pages):
-#                 page = pdf_reader.pages[page_num]
-#                 text = page.extract_text()
-#                 if text and text.strip():  # Only add non-empty pages
-#                     text_with_pages.append({
-#                         'page_number': page_num + 1,  # 1-based page numbering
-#                         'text': clean_text(text) # Clean text here
-#                     })
-#         return text_with_pages
-#     except Exception as e:
-#         raise Exception(f"Error extracting text from PDF (PyPDF2): {str(e)}")
-
 def extract_text_from_pdf_pymupdf(pdf_path):
     """Extract text from a PDF file with page numbers using PyMuPDF (fitz)."""
     text_with_pages = []
     try:
-        doc = fitz.open(pdf_path)  # Open the PDF
+        doc = fitz.open(pdf_path)  
         for page_num, page in enumerate(doc):
-            text = page.get_text("text") # Extract text
-            if text and text.strip(): # Only add non-empty pages
+            text = page.get_text("text")
+            if text and text.strip(): 
                 text_with_pages.append({
-                    'page_number': page_num + 1,  # 1-based page numbering
-                    'text': clean_text(text) # Clean text here
+                    'page_number': page_num + 1, 
+                    'text': clean_text(text) 
                 })
-        doc.close() # Close the document
+        doc.close()
         return text_with_pages
     except Exception as e:
-        # Provide more context in the error message
         raise Exception(f"Error extracting text from PDF '{os.path.basename(pdf_path)}' using PyMuPDF: {str(e)}")
 
 
@@ -65,10 +44,10 @@ def extract_text_from_docx(docx_path):
     try:
         text = docx2txt.process(docx_path)
         if text and text.strip():
-             # Clean text here
+             
             return [{'page_number': 1, 'text': clean_text(text)}]
         else:
-            return [] # Return empty list if no text extracted
+            return [] 
     except Exception as e:
         raise Exception(f"Error extracting text from DOCX '{os.path.basename(docx_path)}': {str(e)}")
 
@@ -78,7 +57,7 @@ def extract_text_from_txt(txt_path):
         with open(txt_path, 'r', encoding='utf-8', errors='ignore') as file: # Added errors='ignore' for robustness
             text = file.read()
         if text and text.strip():
-             # Clean text here
+             
             return [{'page_number': 1, 'text': clean_text(text)}]
         else:
             return [] # Return empty list if no text extracted
