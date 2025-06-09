@@ -16,6 +16,9 @@ class TestBasicFunctionality(unittest.TestCase):
             import document_processor
             import document_store
             import qa_engine
+            import gemini_api
+            import utils
+            import database
             self.assertTrue(True)
         except ImportError as e:
             self.fail(f"Import error: {e}")
