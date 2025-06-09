@@ -24,13 +24,19 @@ except ImportError as e:
 
 # Set environment variable for Gemini API
 # This will work in Streamlit Cloud
-gemini_api_key = st.secrets["GEMINI_API_KEY"]
-
-# Or use this to handle both local .env and Streamlit Cloud secrets
-gemini_api_key = st.secrets.get("GEMINI_API_KEY") or os.environ.get("GEMINI_API_KEY")
-
+try:
+    # First try to get from Streamlit secrets
+    gemini_api_key = st.secrets["GEMINI_API_KEY"]
+except Exception:
+    try:
+        # Then try from environment variables
+        gemini_api_key = os.environ.get("GEMINI_API_KEY")
+    except Exception:
+        gemini_api_key = None
+        
+# Instead of stopping completely, just show a warning and continue
 if not gemini_api_key or gemini_api_key == "YOUR_API_KEY_HERE":
-    st.warning("Gemini API Key not found. Please set the GEMINI_API_KEY environment variable.", icon="⚠️")
+    st.warning("Gemini API Key not found. Please set the GEMINI_API_KEY in Streamlit Cloud secrets.", icon="⚠️")
 else:
     os.environ["GEMINI_API_KEY"] = gemini_api_key # Ensure it's set for qa_engine
 
